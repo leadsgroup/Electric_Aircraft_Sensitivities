@@ -1,9 +1,73 @@
 import matplotlib.pyplot as plt  
 import numpy as np 
     
-def main(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+    
+def main():
+         
+    # -----------------------------------
+    P_aircraft   = 0  
+    eta_em = 0
+    eta_p = 0
+    LD = 0
+    W0 = 0
+    M_struct = 0
+    M_pass = 0
+    M_crew = 0
+    M_payload = 0
+
+    # -----------------------------------    
+    n_p = 0
+    n_s = 0 
+    M_cell = 0
+    E_cell = 0
+    e_cell = 0
+    Q_cell = 0
+    V_cell = 0
+    alpha = 0
+
+    # -----------------------------------    
+    P_motor = 0
+    T_torque_density = 0
+    omega = 0
+    Pd_motor_cooling = 0
+    eta_motor = 0
+
+    # -----------------------------------    
+    P_inverter = 0
+    Pd_inverter = 0
+    eta_inverter = 0
+
+    # -----------------------------------    
+    eta_propeller = 0
+    eta_battery = 0
+    Pd_inverter_cooling = 0
+    V = 0
+    E0 = 0
+    r_cond = 0
+    rho = 0
+    rho_theta_insul = 0
+    L = 0
+    rho_cond = 0
+    rho_insul = 0
+     
+    # -----------------------------------    
+    theta_a = 0
+    I = 0
+    T_4 = 0
+    D = 0
+    g = 0
+    M_0 = 0
+             
+    Range,E_pack =  compute_performance(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+             P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
+             L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell)            
+ 
+
+    return
+
+def compute_performance(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
          P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-         L, rho_cond, rho_insul, eta_em, eta_p, LD, E_pack, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
+         L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
 
      
     # SECTION I: Electrochemical Energy Storage Systems (Batteries)
@@ -35,9 +99,10 @@ def main(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, ome
     # Equation (26): Total Battery Pack Energy (E_pack), derived from charge and voltage
     E_pack = Q_pack * V_pack # Equation (26)
 
-    return
+    return Range,  E_pack
 
-def energy_storage(): 
+def energy_storage():
+    
     # Equation (2): Total dry battery mass (higher fidelity for Eq. (1))
     M_pack = (E_cell / e_cell) * n_p * n_s  # Equation (2)
 
