@@ -24,8 +24,8 @@ def main(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, ome
     M_0 = M_struct + M_pass + M_crew + M_payload + M_drivetrain # Equation (24)
 
     # Equation (23): Aircraft Range Equation
-    R = eta_em * eta_p * (L/D) * E_pack / (g * M_0)  # Equation (23)
-
+    Range =  aircraft_flight_range()
+    
     # Equation (27a): Total Battery Pack Charge
     Q_pack = n_p * Q_cell  # Equation (27a)
 
@@ -93,6 +93,12 @@ def cable_mass():
     theta_max = theta_a + I**2 * R_prime * (T_1 + T_4)  # Equation (19)
     
     return M_cable
+
+def aircraft_flight_range():
+
+    R = eta_em * eta_p * (L/D) * E_pack / (g * M_0)  # Equation (23)
+     
+    return R 
 
 if __name__ == '__main__':
     main() 
