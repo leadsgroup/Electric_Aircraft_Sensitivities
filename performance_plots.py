@@ -7,7 +7,37 @@ def main(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, ome
 
      
     # SECTION I: Electrochemical Energy Storage Systems (Batteries)
+    M_energy_storage =  energy_storage()
 
+    # SECTION II: Electrical Power Conversion Machines
+    M_electric_power_conversion =  power_conversion()
+    
+    # SECTION III: Cabling Mass
+    M_cable =  cable_mass()
+
+    # SECTION IV: Overall Performance
+
+    # Equation (25): Total Drivetrain Mass (M_drivetrain) is the sum of storage, power conversion, and cabling masses
+    M_drivetrain = M_energy_storage + M_electric_power_conversion + M_cable # Equation (25)
+
+    # Equation (24): Total Aircraft Mass (M_0) including masses of structure, passengers, crew, payload, and drivetrain
+    M_0 = M_struct + M_pass + M_crew + M_payload + M_drivetrain # Equation (24)
+
+    # Equation (23): Aircraft Range Equation
+    R = eta_em * eta_p * (L/D) * E_pack / (g * M_0)  # Equation (23)
+
+    # Equation (27a): Total Battery Pack Charge
+    Q_pack = n_p * Q_cell  # Equation (27a)
+
+    # Equation (27b): Total Battery Pack Voltage (V_pack)
+    V_pack = n_s* V_cell  # Equation (27b)
+
+    # Equation (26): Total Battery Pack Energy (E_pack), derived from charge and voltage
+    E_pack = Q_pack * V_pack # Equation (26)
+
+    return
+
+def energy_storage(): 
     # Equation (2): Total dry battery mass (higher fidelity for Eq. (1))
     M_pack = (E_cell / e_cell) * n_p * n_s  # Equation (2)
 
@@ -15,9 +45,11 @@ def main(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, ome
     M_BMS = alpha * M_pack  # Equation (3)
 
     # Equation (4): Total Energy Storage Mass
-    M_energy_storage = (1 + alpha) * (E_cell / e_cell) * n_p * n_s 
+    M_energy_storage = (1 + alpha) * (E_cell / e_cell) * n_p * n_s
+    
+    return M_energy_storage
 
-    # SECTION II: Electrical Power Conversion Machines
+def power_conversion(): 
 
     # Equation (6): Motor Mass, with motor power calculated based on aircraft power, motor efficiency, and propeller efficiency
     P_motor = P_aircraft / (eta_motor * eta_propeller)
@@ -41,7 +73,9 @@ def main(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, ome
     # Equation (16): Electric Power Conversion Mass (using detailed formula for high fidelity)
     M_electric_power_conversion = (P_aircraft / (eta_motor * eta_propeller)) * ((1 / T_torque_density) + ((1-eta_motor) / (eta_inverter * Pd_motor_cooling)) + (1 / (eta_inverter * Pd_inverter)) + ((1 - eta_inverter) / (eta_battery * eta_inverter * Pd_inverter_cooling)))  # Equation (16)
 
-    # SECTION III: Cabling Mass
+    return M_electric_power_conversion  
+
+def cable_mass():
 
     # Equation (18): Cable Insulation Radius based on voltage and electric field constraints
     r_insul = r_cond * np.exp(V / (E0 * r_cond))  # Equation (18)
@@ -57,28 +91,8 @@ def main(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, ome
 
     # Equation (19): Maximum Temperature (conductor temperature based on current, resistance, and thermal resistances)
     theta_max = theta_a + I**2 * R_prime * (T_1 + T_4)  # Equation (19)
-
-    # SECTION IV: Overall Performance
-
-    # Equation (25): Total Drivetrain Mass (M_drivetrain) is the sum of storage, power conversion, and cabling masses
-    M_drivetrain = M_energy_storage + M_electric_power_conversion + M_cable # Equation (25)
-
-    # Equation (24): Total Aircraft Mass (M_0) including masses of structure, passengers, crew, payload, and drivetrain
-    M_0 = M_struct + M_pass + M_crew + M_payload + M_drivetrain # Equation (24)
-
-    # Equation (23): Aircraft Range Equation
-    R = eta_em * eta_p * (L/D) * E_pack / (g * M_0)  # Equation (23)
-
-    # Equation (27a): Total Battery Pack Charge
-    Q_pack = n_p * Q_cell  # Equation (27a)
-
-    # Equation (27b): Total Battery Pack Voltage (V_pack)
-    V_pack = n_s* V_cell  # Equation (27b)
-
-    # Equation (26): Total Battery Pack Energy (E_pack), derived from charge and voltage
-    E_pack = Q_pack * V_pack # Equation (26)
-
-    return
+    
+    return M_cable
 
 if __name__ == '__main__':
     main() 
