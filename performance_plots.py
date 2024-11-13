@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt  
-import numpy as np 
+import numpy as np
     
     
 def main():
@@ -15,15 +15,15 @@ def main():
     M_crew = 0
     M_payload = 0
 
-    # -----------------------------------    
+    # ----------------------------------    
     n_p = 210
     n_s = 120
     M_cell = 0.048
-    E_cell = 0
-    e_cell = 0
+    E_pack = 0
+    e_cell = np.random.normal(loc=3500, scale=100)
     Q_cell = 0
     V_cell = 4.2
-    alpha = 0
+    alpha = np.random.normal(loc=1.42, scale=0.05)
 
     # -----------------------------------    
     P_motor = 0
@@ -58,26 +58,27 @@ def main():
     g = 0
     M_0 = 0
              
-    Range,E_pack =  compute_performance(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+    Range,E_pack =  compute_performance(n_p, n_s, M_cell, E_pack, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
              P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
              L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell)            
  
 
     return
 
-def compute_performance(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-         P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-         L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
+def compute_performance(n_p, n_s, M_cell, E_pack, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+             P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
+             L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
 
      
     # SECTION I: Electrochemical Energy Storage Systems (Batteries)
-    M_energy_storage =  energy_storage()
+    M_energy_storage =  energy_storage(n_p, n_s, M_cell, E_pack, e_cell, alpha)
 
     # SECTION II: Electrical Power Conversion Machines
-    M_electric_power_conversion =  power_conversion()
+    M_electric_power_conversion =  power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+         P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling)
     
     # SECTION III: Cabling Mass
-    M_cable =  cable_mass()
+    M_cable =  cable_mass(V, E0, r_cond, rho, rho_theta_insul,L, rho_cond, rho_insul, theta_a, I, T_4)
 
     # SECTION IV: Overall Performance
 
@@ -88,7 +89,7 @@ def compute_performance(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torq
     M_0 = M_struct + M_pass + M_crew + M_payload + M_drivetrain # Equation (24)
 
     # Equation (23): Aircraft Range Equation
-    Range =  aircraft_flight_range()
+    Range =  aircraft_flight_range(E_pack,L, eta_em, eta_p, D, g, M_0)
     
     # Equation (27a): Total Battery Pack Charge
     Q_pack = n_p * Q_cell  # Equation (27a)
@@ -99,26 +100,24 @@ def compute_performance(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torq
     # Equation (26): Total Battery Pack Energy (E_pack), derived from charge and voltage
     E_pack = Q_pack * V_pack # Equation (26)
 
-    return Range,  E_pack
+    return Range, E_pack
 
-def energy_storage(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-         P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-         L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
+def energy_storage(n_p, n_s, M_cell, E_pack, e_cell, alpha):
     
     # Equation (2): Total dry battery mass (higher fidelity for Eq. (1))
-    M_pack = (E_cell / e_cell) * n_p * n_s  # Equation (2)
+    M_pack = M_cell * n_p * n_s  # Equation (2)
+    E_pack = e_cell*M_pack
 
     # Equation (3): Battery Control & Thermal Management System Mass
     M_BMS = alpha * M_pack  # Equation (3)
 
     # Equation (4): Total Energy Storage Mass
-    M_energy_storage = (1 + alpha) * (E_cell / e_cell) * n_p * n_s
+    M_energy_storage = (1 + alpha) * (E_pack / e_cell) * n_p * n_s
     
     return M_energy_storage
 
-def power_conversion(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-         P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-         L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell): 
+def power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+         P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling): 
 
     # Equation (6): Motor Mass, with motor power calculated based on aircraft power, motor efficiency, and propeller efficiency
     P_motor = P_aircraft / (eta_motor * eta_propeller)
@@ -144,9 +143,7 @@ def power_conversion(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_
 
     return M_electric_power_conversion  
 
-def cable_mass(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-         P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-         L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
+def cable_mass(V, E0, r_cond, rho, rho_theta_insul,L, rho_cond, rho_insul, theta_a, I, T_4):
 
     # Equation (18): Cable Insulation Radius based on voltage and electric field constraints
     # E0 is the electric field
@@ -166,9 +163,7 @@ def cable_mass(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_densit
     
     return M_cable
 
-def aircraft_flight_range(n_p, n_s, M_cell, E_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-         P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-         L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
+def aircraft_flight_range(E_pack,L, eta_em, eta_p, D, g, M_0):
 
     R = eta_em * eta_p * (L/D) * E_pack / (g * M_0)  # Equation (23)
      
