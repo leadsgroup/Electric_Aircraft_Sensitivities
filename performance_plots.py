@@ -21,7 +21,7 @@ def main():
     M_cell = 0.048
     E_pack = 0
     e_cell = np.random.normal(loc=3500, scale=100)
-    Q_cell = 0
+    Q_cell = np.random.normal(loc=20, scale=1)
     V_cell = 4.2
     alpha = np.random.normal(loc=1.42, scale=0.05)
 
@@ -30,7 +30,7 @@ def main():
     T_torque_density = 0
     omega = 0
     Pd_motor_cooling = 0
-    eta_motor = 0
+    eta_motor = np.random.normal(loc=0.98, scale=0.02)
 
     # -----------------------------------    
     P_inverter = 0
@@ -38,8 +38,8 @@ def main():
     eta_inverter = 0
 
     # -----------------------------------    
-    eta_propeller = 0.86
-    eta_battery = 0.9
+    eta_propeller = np.random.normal(loc=0.86, scale=0.02)
+    eta_battery = np.random.normal(loc=0.9, scale=0.02)
     Pd_inverter_cooling = 0
     V = 0
     E0 = 2.51e3
@@ -51,7 +51,7 @@ def main():
     rho_insul = 0
      
     # -----------------------------------    
-    theta_a = 253 # in Kelvin
+    theta_a = np.random.normal(loc=253, scale=20) # in Kelvin
     I = 0
     T_4 = 0
     D = 0
