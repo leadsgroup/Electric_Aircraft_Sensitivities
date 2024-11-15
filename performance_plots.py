@@ -10,14 +10,14 @@ def main():
     
     n_A              = len(Aircraft_Classes) 
     n_sims           = 10000
-    
+    hybridization    = 1.0
     
     Range            = np.zeros(n_sims)
     Pack_Energy      = np.zeros(n_sims)    
     for ac in range(n_A): 
         # ---------------------Aircraft ------------------------
         Aircraft            = Aircraft_Classes[ac] 
-        P_aircraft          = Max_Power[ac]  
+        P_aircraft          = Max_Power[ac] * hybridization
         eta_em              = np.random.normal(loc=0.95, scale=0.05) 
         eta_p               = 0
         LD                  = np.random.normal(loc = L_D_aircraft[ac], scale = 1)
@@ -39,7 +39,7 @@ def main():
         eta_battery         = np.random.normal(loc=0.9, scale=0.02)  
     
         # ---------------------Power Conversion --------------    
-        P_motor             = np.random.normal(loc=2000, scale=100) 
+        P_motor             = np.random.normal(loc=2000, scale=100)  # should this be P_aircraft? 
         T_torque_density    = np.random.normal(loc=1.5, scale=0.05) 
         omega               = np.random.normal(loc=2500, scale=200) 
         Pd_motor_cooling    = np.random.normal(loc=50, scale=5) 
@@ -47,7 +47,7 @@ def main():
         
     
         # -----------------------Inverter-----------------------    
-        P_inverter          = np.random.normal(loc=200, scale=5) 
+        P_inverter          = np.random.normal(loc=200, scale=5)  # should this be P_aircraft? 
         Pd_inverter         = np.random.normal(loc=50, scale=5) 
         eta_inverter        = np.random.normal(loc=0.9, scale=0.02)  
         Pd_inverter_cooling = np.random.normal(loc=50, scale=5) 
@@ -74,14 +74,15 @@ def main():
         Range[R]
         Pack_Energy[E]
         
-    create_plots(Range, Pack_Energy)
+    plot_results(Range, Pack_Energy)
     
     return         
         
-def create_plots(Range, Pack_Energy):
+def plot_results(Range, Pack_Energy):
     
     fig =  plt.figure() 
     axis =  fig.add_subplot()
+    
     
     return 
     
