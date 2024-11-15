@@ -22,7 +22,7 @@ def main():
     Pack_Energy           = np.zeros(n_sims) 
     Energy_Pack_Mass      = np.zeros(n_sims)
     Power_Conversion_Mass = np.zeros(n_sims)
-    System_Voltage       = np.zeros(n_sims)
+    System_Voltage        = np.zeros(n_sims)
     
     for ac in range(n_A): 
         # ---------------------Aircraft ------------------------  
