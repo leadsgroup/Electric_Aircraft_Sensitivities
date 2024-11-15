@@ -4,12 +4,16 @@ import numpy as np
     
 def main():
      
+    Aircraft_Classes = ['commuter', 'regional', 'short_range']
+    
+    n_A = len(Aircraft_Classes)
+
     n_sims       = 10000
     Range        = np.zeros(n_sims)
-    Pack_Energy  = np.zeros(n_sims)
-    
-    for i in range(10000): 
-        # ---------------------Aircraft ------------------------            
+    Pack_Energy  = np.zeros(n_sims)    
+    for ac in range(n_A): 
+        # ---------------------Aircraft ------------------------
+        Aircraft      = Aircraft_Classes[ac] 
         P_aircraft    = 0  
         eta_em        = 0
         eta_p         = 0
@@ -18,8 +22,9 @@ def main():
         M_struct      = 0
         M_pass        = 0
         M_crew        = 0
-        M_payload     = 0
-        eta_propeller = np.random.normal(loc=0.86, scale=0.02) #known
+        M_payload     = 0 
+        
+        eta_propulsion = np.random.normal(loc=0.86, scale=0.02) #known
         
         # ------------------- Energy Storage -------------------    
         n_p          = 210 #known
@@ -62,7 +67,7 @@ def main():
         g       = np.random.normal(loc=9.81, scale=0.01) #known  
     
         R,E = compute_performance(n_p, n_s, M_cell, E_pack, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-                P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
+                P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
                 L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell)            
          
         Range[R]
@@ -85,7 +90,7 @@ def aircraft_flight_range(E_pack,L, eta_em, eta_p, D, g, M_0):
     return R
 
 def compute_performance(n_p, n_s, M_cell, E_pack, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-         P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
+         P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
          L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
 
     # SECTION I: Electrochemical Energy Storage Systems (Batteries)
@@ -93,7 +98,7 @@ def compute_performance(n_p, n_s, M_cell, E_pack, e_cell, alpha, P_motor, T_torq
 
     # SECTION II: Electrical Power Conversion Machines
     M_electric_power_conversion =  power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-        P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling)
+        P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling)
     
     # SECTION III: Cabling Mass
     M_cable ,  theta_max =  cable_mass(V, E0, r_cond, rho, rho_theta_insul,L, rho_cond, rho_insul, theta_a, I, T_4)
@@ -155,14 +160,14 @@ def energy_storage(n_p, n_s, M_cell, E_pack, e_cell, alpha):
     return M_energy_storage
 
 def power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-        P_inverter, Pd_inverter, eta_inverter, eta_propeller, eta_battery, P_aircraft, Pd_inverter_cooling): 
+        P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling): 
 
     # Equation (6): Motor Mass, with motor power calculated based on aircraft power, motor efficiency, and propeller efficiency
-    P_motor = P_aircraft / (eta_motor * eta_propeller)
+    P_motor = P_aircraft / (eta_motor * eta_propulsion)
     M_motor = P_motor / (T_torque_density * omega)  # Equation (6)
 
     # Equation (7) or (9): Motor Cooling System Mass (using higher fidelity if needed)
-    P_inverter = P_aircraft / (eta_inverter * eta_motor * eta_propeller)  # Derived power of the inverter based on efficiencies
+    P_inverter = P_aircraft / (eta_inverter * eta_motor * eta_propulsion)  # Derived power of the inverter based on efficiencies
     M_motor_cooling = P_inverter * (1 - eta_motor) / Pd_motor_cooling  # Equation (7) or Equation (9) as per fidelity
 
     # Equation (10): Inverter Mass
@@ -170,14 +175,14 @@ def power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_mot
     # Alternative: M_inverter = (k_1 / f_s) + k_2 * f_s * V**2 for different fidelity level (Eq. (13))
 
     # Equation (11) or (12): Inverter Cooling System Mass (using higher fidelity if needed)
-    P_battery = P_aircraft / (eta_battery * eta_inverter * eta_motor * eta_propeller)  # Battery power derived based on efficiencies
+    P_battery = P_aircraft / (eta_battery * eta_inverter * eta_motor * eta_propulsion)  # Battery power derived based on efficiencies
     M_inverter_cooling = P_battery * (1 - eta_inverter) / Pd_inverter_cooling  # Equation (11) or Equation (12)
 
     # Equation (15): Total Motor Drive Mass
     M_total_motor_drive = M_motor + M_motor_cooling + M_inverter + M_inverter_cooling  # Equation (15)
 
     # Equation (16): Electric Power Conversion Mass (using detailed formula for high fidelity)
-    M_electric_power_conversion = (P_aircraft / (eta_motor * eta_propeller)) * ((1 / T_torque_density) + ((1-eta_motor) / (eta_inverter * Pd_motor_cooling)) + (1 / (eta_inverter * Pd_inverter)) + ((1 - eta_inverter) / (eta_battery * eta_inverter * Pd_inverter_cooling)))  # Equation (16)
+    M_electric_power_conversion = (P_aircraft / (eta_motor * eta_propulsion)) * ((1 / T_torque_density) + ((1-eta_motor) / (eta_inverter * Pd_motor_cooling)) + (1 / (eta_inverter * Pd_inverter)) + ((1 - eta_inverter) / (eta_battery * eta_inverter * Pd_inverter_cooling)))  # Equation (16)
 
     return M_electric_power_conversion 
 
