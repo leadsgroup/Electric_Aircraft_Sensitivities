@@ -5,54 +5,55 @@ import numpy as np
 def main():
      
     Aircraft_Classes = ['commuter', 'regional', 'short_range']
+    Max_Power        = [ 10000, 10000 ,10000  ] # need to update
+    L_D_aircraft     = [15, 16, 17]
     
-    n_A = len(Aircraft_Classes)
-
-    n_sims       = 10000
-    Range        = np.zeros(n_sims)
-    Pack_Energy  = np.zeros(n_sims)    
+    n_A              = len(Aircraft_Classes) 
+    n_sims           = 10000
+    
+    
+    Range            = np.zeros(n_sims)
+    Pack_Energy      = np.zeros(n_sims)    
     for ac in range(n_A): 
         # ---------------------Aircraft ------------------------
-        Aircraft      = Aircraft_Classes[ac] 
-        P_aircraft    = 0  
-        eta_em        = 0
-        eta_p         = 0
-        LD            = 0
-        W0            = 0
-        M_struct      = 0
-        M_pass        = 0
-        M_crew        = 0
-        M_payload     = 0 
-        
-        eta_propulsion = np.random.normal(loc=0.86, scale=0.02) #known
+        Aircraft            = Aircraft_Classes[ac] 
+        P_aircraft          = Max_Power[ac]  
+        eta_em              = np.random.normal(loc=0.95, scale=0.05) 
+        eta_p               = 0
+        LD                  = np.random.normal(loc = L_D_aircraft[ac], scale = 1)
+        W0                  = 0
+        M_struct            = 0
+        M_pass              = 0
+        M_crew              = 0
+        M_payload           = 0  
+        eta_propulsion      = np.random.normal(loc=0.86, scale=0.02) 
         
         # ------------------- Energy Storage -------------------    
-        n_p          = 210 #known
-        n_s          = 120 #known
-        M_cell       = 0.048 #known
-        E_pack       = 0 #known
-        e_cell       = np.random.normal(loc=3500, scale=100) #known
-        Q_cell       = np.random.normal(loc=20, scale=1) #dummy
-        V_cell       = 4.2 #dummy
-        alpha        = np.random.normal(loc=1.42, scale=0.05) #known
-        eta_battery  = np.random.normal(loc=0.9, scale=0.02) #known 
+        n_p                 = 210   # number of cells in parallel 
+        n_s                 = 120   # number of cells in series 
+        M_cell              = 0.048 # unit mass of cell
+        e_cell              = np.random.normal(loc=3500, scale=100)  # specific energy of battery cell
+        Q_cell              = np.random.normal(loc=20, scale=1) 
+        V_cell              = np.random.normal(loc=4.2,scape=1)      # voltage of battery cell 
+        alpha               = np.random.normal(loc=1.42, scale=0.05) # BMS packaging factor 
+        eta_battery         = np.random.normal(loc=0.9, scale=0.02)  
     
         # ---------------------Power Conversion --------------    
-        P_motor          = np.random.normal(loc=2000, scale=100) #dummy
-        T_torque_density = np.random.normal(loc=1.5, scale=0.05) #dummy
-        omega            = np.random.normal(loc=2500, scale=200) #dummy
-        Pd_motor_cooling = np.random.normal(loc=50, scale=5) #dummy
-        eta_motor        = np.random.normal(loc=0.98, scale=0.02) #known
+        P_motor             = np.random.normal(loc=2000, scale=100) 
+        T_torque_density    = np.random.normal(loc=1.5, scale=0.05) 
+        omega               = np.random.normal(loc=2500, scale=200) 
+        Pd_motor_cooling    = np.random.normal(loc=50, scale=5) 
+        eta_motor           = np.random.normal(loc=0.98, scale=0.02) 
         
     
         # -----------------------Inverter-----------------------    
-        P_inverter          = np.random.normal(loc=200, scale=5) #dummy
-        Pd_inverter         = np.random.normal(loc=50, scale=5) #dummy
-        eta_inverter        = np.random.normal(loc=0.9, scale=0.02) #known 
-        Pd_inverter_cooling = np.random.normal(loc=50, scale=5) #dummy
+        P_inverter          = np.random.normal(loc=200, scale=5) 
+        Pd_inverter         = np.random.normal(loc=50, scale=5) 
+        eta_inverter        = np.random.normal(loc=0.9, scale=0.02)  
+        Pd_inverter_cooling = np.random.normal(loc=50, scale=5) 
         V                   = 0
-        E0                  = 2.51e3 #known
-        r_cond              = np.random.normal(loc=10, scale=0.1) #dummy
+        E0                  = 2.51e3 
+        r_cond              = np.random.normal(loc=10, scale=0.1) 
         rho                 = 0
         rho_theta_insul     = 0
         L                   = 0
@@ -60,13 +61,13 @@ def main():
         rho_insul           = 0
             
         # ------------------------ Cables ----------------------------    
-        theta_a = np.random.normal(loc=253, scale=20) #known  # in Kelvin
-        I       = 0
-        T_4     = 0
-        D       = np.random.normal(loc=2000, scale=100) #dummy
-        g       = np.random.normal(loc=9.81, scale=0.01) #known  
+        theta_a             = np.random.normal(loc=253, scale=20)   # in Kelvin
+        I                   = 0
+        T_4                 = 0
+        D                   = np.random.normal(loc=2000, scale=100) 
+        g                   = np.random.normal(loc=9.81, scale=0.01)   
     
-        R,E = compute_performance(n_p, n_s, M_cell, E_pack, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+        R,E = compute_performance(n_p, n_s, M_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
                 P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
                 L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell)            
          
@@ -84,17 +85,12 @@ def create_plots(Range, Pack_Energy):
     
     return 
     
-        
-def aircraft_flight_range(E_pack,L, eta_em, eta_p, D, g, M_0):
-    R = eta_em * eta_p * (L/D) * E_pack / (g * M_0)  # Equation (23)
-    return R
-
-def compute_performance(n_p, n_s, M_cell, E_pack, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+def compute_performance(n_p, n_s, M_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
          P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
          L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
 
     # SECTION I: Electrochemical Energy Storage Systems (Batteries)
-    M_energy_storage =  energy_storage(n_p, n_s, M_cell, E_pack, e_cell, alpha)
+    M_energy_storage =  energy_storage(n_p, n_s, M_cell, e_cell, alpha)
 
     # SECTION II: Electrical Power Conversion Machines
     M_electric_power_conversion =  power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
@@ -123,7 +119,7 @@ def compute_performance(n_p, n_s, M_cell, E_pack, e_cell, alpha, P_motor, T_torq
     # Equation (26): Total Battery Pack Energy (E_pack), derived from charge and voltage
     E_pack = Q_pack * V_pack # Equation (26)
 
-    return Range, E_pack 
+    return Range, E_pack  
 
 def cable_mass(V, E0, r_cond, rho, rho_theta_insul,L, rho_cond, rho_insul, theta_a, I, T_4):
 
@@ -145,7 +141,7 @@ def cable_mass(V, E0, r_cond, rho, rho_theta_insul,L, rho_cond, rho_insul, theta
     
     return M_cable, theta_max
 
-def energy_storage(n_p, n_s, M_cell, E_pack, e_cell, alpha):
+def energy_storage(n_p, n_s, M_cell, e_cell, alpha):
     
     # Equation (2): Total dry battery mass (higher fidelity for Eq. (1))
     M_pack = M_cell * n_p * n_s  # Equation (2)
@@ -188,7 +184,7 @@ def power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_mot
 
 def aircraft_flight_range(E_pack,L, eta_em, eta_p, D, g, M_0):
     R = eta_em * eta_p * (L/D) * E_pack / (g * M_0)  # Equation (23)
-    return R
+    return R 
 
 if __name__ == '__main__':
     main() 
