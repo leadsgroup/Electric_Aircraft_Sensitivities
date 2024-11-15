@@ -4,28 +4,36 @@ import numpy as np
     
 def main():
      
-    Aircraft_Classes = ['commuter', 'regional', 'short_range']
-    Max_Power        = [ 10000, 10000 ,10000  ] # need to update
-    L_D_aircraft     = [15, 16, 17]
+    Aircraft_Classes  = ['commuter', 'regional', 'short_range']
+    Max_Power         = [ 10000, 10000 ,10000  ] # need to update
+    L_D_aircraft      = [15, 16, 17]
+    Aircraft_Weight   = [0,0,0 ]
+    Structural_Weight = [0,0,0 ] 
+    Passenger_Weight  = [0,0,0 ]
+    Crew_Weight       = [0,0,0 ]
+    Payload_Weight    = [0,0,0 ]
+    
     
     n_A              = len(Aircraft_Classes) 
     n_sims           = 10000
     hybridization    = 1.0
     
-    Range            = np.zeros(n_sims)
-    Pack_Energy      = np.zeros(n_sims)    
+    Range                 = np.zeros(n_sims)
+    Pack_Energy           = np.zeros(n_sims) 
+    Energy_Pack_Mass      = np.zeros(n_sims)
+    Power_Conversion_Mass = np.zeros(n_sims)
+    System_Voltage       = np.zeros(n_sims)
+    
     for ac in range(n_A): 
-        # ---------------------Aircraft ------------------------
-        Aircraft            = Aircraft_Classes[ac] 
+        # ---------------------Aircraft ------------------------  
         P_aircraft          = Max_Power[ac] * hybridization
         eta_em              = np.random.normal(loc=0.95, scale=0.05) 
         eta_p               = 0
-        LD                  = np.random.normal(loc = L_D_aircraft[ac], scale = 1)
-        W0                  = 0
-        M_struct            = 0
-        M_pass              = 0
-        M_crew              = 0
-        M_payload           = 0  
+        LD                  = np.random.normal(loc = L_D_aircraft[ac], scale = 1) 
+        M_struct            = Structural_Weight[ac]
+        M_pass              = Passenger_Weight[ac]
+        M_crew              = Crew_Weight[ac]
+        M_payload           = Payload_Weight[ac]  
         eta_propulsion      = np.random.normal(loc=0.86, scale=0.02) 
         
         # ------------------- Energy Storage -------------------    
@@ -67,18 +75,21 @@ def main():
         D                   = np.random.normal(loc=2000, scale=100) 
         g                   = np.random.normal(loc=9.81, scale=0.01)   
     
-        R,E = compute_performance(n_p, n_s, M_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
+        R,E,M_e, M_p , M_c, V_p = compute_performance(n_p, n_s, M_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
                 P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-                L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell)            
+                L, rho_cond, rho_insul, eta_em, eta_p, LD, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g , Q_cell, V_cell)            
          
         Range[R]
         Pack_Energy[E]
+        Energy_Pack_Mass[M_e]
+        Power_Conversion_Mass[M_p]
+        System_Voltage[V_p]  
         
-    plot_results(Range, Pack_Energy)
+    plot_results(Range, Aircraft_Weight,  Pack_Energy,Energy_Pack_Mass, Power_Conversion_Mass, System_Voltage)
     
     return         
         
-def plot_results(Range, Pack_Energy):
+def plot_results(Range, Aircraft_Weight,  Pack_Energy,Energy_Pack_Mass, Power_Conversion_Mass, System_Voltage):
     
     fig =  plt.figure() 
     axis =  fig.add_subplot()
@@ -88,7 +99,7 @@ def plot_results(Range, Pack_Energy):
     
 def compute_performance(n_p, n_s, M_cell, e_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
          P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-         L, rho_cond, rho_insul, eta_em, eta_p, LD, W0, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g, M_0, Q_cell, V_cell):
+         L, rho_cond, rho_insul, eta_em, eta_p, LD, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g,Q_cell, V_cell):
 
     # SECTION I: Electrochemical Energy Storage Systems (Batteries)
     M_energy_storage =  energy_storage(n_p, n_s, M_cell, e_cell, alpha)
@@ -120,7 +131,7 @@ def compute_performance(n_p, n_s, M_cell, e_cell, alpha, P_motor, T_torque_densi
     # Equation (26): Total Battery Pack Energy (E_pack), derived from charge and voltage
     E_pack = Q_pack * V_pack # Equation (26)
 
-    return Range, E_pack  
+    return Range, E_pack ,M_energy_storage, M_electric_power_conversion , M_cable, V_pack 
 
 def cable_mass(V, E0, r_cond, rho, rho_theta_insul,L, rho_cond, rho_insul, theta_a, I, T_4):
 
@@ -181,7 +192,7 @@ def power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_mot
     # Equation (16): Electric Power Conversion Mass (using detailed formula for high fidelity)
     M_electric_power_conversion = (P_aircraft / (eta_motor * eta_propulsion)) * ((1 / T_torque_density) + ((1-eta_motor) / (eta_inverter * Pd_motor_cooling)) + (1 / (eta_inverter * Pd_inverter)) + ((1 - eta_inverter) / (eta_battery * eta_inverter * Pd_inverter_cooling)))  # Equation (16)
 
-    return M_electric_power_conversion 
+    return M_electric_power_conversion
 
 def aircraft_flight_range(E_pack,L, eta_em, eta_p, D, g, M_0):
     R = eta_em * eta_p * (L/D) * E_pack / (g * M_0)  # Equation (23)
