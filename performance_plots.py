@@ -84,11 +84,10 @@ def main():
                 I                   = 1 # NEED UPDATING 
                 T_4                 = 1 # NEED UPDATING 
                 D                   = np.random.normal(loc=2000, scale=100, size= n_sims) 
-                g                   = np.random.normal(loc=9.81, scale=0.01, size= n_sims)   
             
                 R,E,M_e, M_p , M_c, V_p,P = compute_performance(n_p, n_s, M_cell, E_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
                         P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-                        L, rho_cond, rho_insul, eta_em, eta_p, LD, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g , Q_cell, V_cell,C_rate_max)            
+                        L, rho_cond, rho_insul, eta_em, eta_p, LD, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D , Q_cell, V_cell,C_rate_max)            
                  
                 Range[ac, n_s_i, n_p_i]                  = R
                 Pack_Energy[ac, n_s_i, n_p_i]            = E
@@ -140,7 +139,7 @@ def compute_performance(n_p, n_s, M_cell, E_cell, alpha, P_motor, T_torque_densi
     M_0 = M_struct + M_pass + M_crew + M_payload + M_drivetrain # Equation (24)
 
     # Equation (23): Aircraft Range Equation
-    Range =  aircraft_flight_range(E_pack,L, eta_em, eta_p, D, g, M_0)
+    Range =  aircraft_flight_range(E_pack,L, eta_em, eta_p, D,  M_0)
     
     # Equation (27a): Total Battery Pack Charge
     Q_pack = n_p * Q_cell  # Equation (27a)
@@ -221,7 +220,8 @@ def power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_mot
 
     return M_electric_power_conversion
 
-def aircraft_flight_range(E_pack,L, eta_em, eta_p, D, g, M_0): 
+def aircraft_flight_range(E_pack,L, eta_em, eta_p, D, M_0):
+    g =  9.18
     Wh_per_kg_to_J         = 3600.0 
     E_pack_J               = E_pack *Wh_per_kg_to_J    
     R = eta_em * eta_p * (L/D) * E_pack_J / (g * M_0)  # Equation (23)
