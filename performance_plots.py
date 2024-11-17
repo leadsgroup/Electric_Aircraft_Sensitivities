@@ -32,9 +32,9 @@ def main():
     System_Voltage        = np.zeros((n_A, n_S, n_P,n_sims))
     System_Power          = np.zeros((n_A, n_S, n_P,n_sims))
      
-    for ac in range(n_A): 
-        for n_s_i in range(n_S):      
-            for n_p_i in range(n_P):    
+    for ac in range(n_A): # loop over the aircraft 
+        for n_s_i in range(n_S): # loop over the number of cells in series 
+            for n_p_i in range(n_P): # loop over the number of cells in parallel 
                 # ---------------------Aircraft ------------------------  
                 P_aircraft          = Max_Power_Required[ac] * hybridization
                 eta_em              = np.random.normal(loc=0.95, scale=0.05, size= n_sims) 
