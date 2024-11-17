@@ -8,7 +8,7 @@ def main():
 
     Aircraft_Names    = ['Twin_Otter', 'ATR_72' , 'Airbus_A220']     
     Aircraft_Classes  = ['commuter', 'regional' , 'short_haul']
-    Max_Power         = [ 1158000, 2050000  ,13567500  ] # need to update
+    Max_Power_Required         = [ 1158000, 2050000  ,13567500  ] # need to update
     L_D_aircraft      = [15, 16 ,18 ]                    # lift to drag ratio at cruise
     Aircraft_Weight   = [6575,23000 ,63100 ]             # kg 
     Structural_Weight = [0,0,0 ] # Zero-fuel weights , assuming fixed weights but subject to change
@@ -36,7 +36,7 @@ def main():
         for n_s_i in range(n_S):      
             for n_p_i in range(n_P):    
                 # ---------------------Aircraft ------------------------  
-                P_aircraft          = Max_Power[ac] * hybridization
+                P_aircraft          = Max_Power_Required[ac] * hybridization
                 eta_em              = np.random.normal(loc=0.95, scale=0.05, size= n_sims) 
                 eta_p               = np.random.normal(loc=0.95, scale=0.05, size= n_sims) 
                 LD                  = np.random.normal(loc = L_D_aircraft[ac], scale = 1, size= n_sims) 
@@ -58,7 +58,7 @@ def main():
                 eta_battery         = np.random.normal(loc=0.9, scale=0.02, size= n_sims)  
             
                 # ---------------------Power Conversion --------------    
-                P_motor             = np.random.normal(loc=Max_Power[ac], scale=100, size= n_sims)  # should this be P_aircraft? 
+                P_motor             = np.random.normal(loc=Max_Power_Required[ac], scale=100, size= n_sims)  # should this be P_aircraft? 
                 T_torque_density    = np.random.normal(loc=1.5, scale=0.05, size= n_sims) 
                 omega               = np.random.normal(loc=2500, scale=200, size= n_sims) 
                 Pd_motor_cooling    = np.random.normal(loc=50, scale=5, size= n_sims) 
@@ -97,11 +97,11 @@ def main():
                 System_Voltage[ac, n_s_i, n_p_i]         =  V_p
                 System_Power[ac, n_s_i, n_p_i]           =  P
         
-    plot_results(Range, Aircraft_Weight,  Pack_Energy,Energy_Pack_Mass, Power_Conversion_Mass, System_Voltage)
+    plot_results(Range, Aircraft_Weight,  Pack_Energy,Energy_Pack_Mass, Power_Conversion_Mass, System_Voltage,System_Power, Max_Power_Required)
     
     return         
         
-def plot_results(Range, Aircraft_Weight,  Pack_Energy,Energy_Pack_Mass, Power_Conversion_Mass, System_Voltage):
+def plot_results(Range, Aircraft_Weight,  Pack_Energy,Energy_Pack_Mass, Power_Conversion_Mass, System_Voltage,System_Power, Max_Power_Required):
     
     fig    = plt.figure() 
     axis_1 = fig.add_subplot()
