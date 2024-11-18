@@ -8,7 +8,7 @@ def main():
 
     Aircraft_Names    = ['Twin_Otter', 'ATR_72' , 'Airbus_A220']     
     Aircraft_Classes  = ['commuter', 'regional' , 'short_haul']
-    Max_Power_Required         = [ 1158000, 2050000  ,13567500  ] # need to update
+    Max_Power_Required = [ 1158000, 2050000  ,13567500  ] # need to update
     L_D_aircraft      = [15, 16 ,18 ]                    # lift to drag ratio at cruise
     Aircraft_Weight   = [6575,23000 ,63100 ]             # kg 
     Structural_Weight = [0,0,0 ] # Zero-fuel weights , assuming fixed weights but subject to change
