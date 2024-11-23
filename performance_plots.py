@@ -2,32 +2,29 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import sympy as smp
-plt.style.use(['science','notebook'])    
+#plt.style.use(['science','notebook'])    
     
 def main():
 
-    Aircraft_Names    = ['Twin_Otter', 'ATR_72' , 'Airbus_A220']     
-    Aircraft_Classes  = ['commuter', 'regional' , 'short_haul']
+    Aircraft_Names     = ['Twin_Otter', 'ATR_72' , 'Airbus_A220']     
+    Aircraft_Classes   = ['commuter', 'regional' , 'short_haul']
     Max_Power_Required = [ 1158000, 2050000  ,13567500  ] # need to update
-    L_D_aircraft      = [15, 16 ,18 ]                    # lift to drag ratio at cruise
-    Aircraft_Weight   = [6575,23000 ,63100 ]             # kg 
-    Structural_Weight = [0,0,0 ] # Zero-fuel weights , assuming fixed weights but subject to change
-    Passenger_Weight  = [0,0,0 ] # Zero-fuel weights , assuming fixed weights but subject to change
-    Crew_Weight       = [0,0,0 ] # Zero-fuel weights , assuming fixed weights but subject to change
-    Payload_Weight    = [0,0,0 ] # Zero-fuel weights , assuming fixed weights but subject to change
-    
+    L_D_aircraft       = [15, 16 ,18 ]                    # lift to drag ratio at cruise
+    Aircraft_Weight    = [6575,23000 ,80000 ]             # kg
+    M_aircraft_minus_drivetrain  = [4119.56,19783,65377 ] # Zero-fuel weights , assuming fixed weights but subject to change
+ 
     n_A              = len(Aircraft_Classes) 
     n_sims           = 100
     hybridization    = 1.0
     
-    cells_in_series    = np.linspace(1000, 10000, 10)
-    cells_in_parallel  = np.linspace(1000, 10000, 10)
+    cells_in_series    = np.linspace(100, 1000, 5)
+    cells_in_parallel  = np.linspace(100, 1000, 10)
     n_S = len(cells_in_series)
     n_P = len(cells_in_parallel)
     
     Range                 = np.zeros((n_A, n_S, n_P,n_sims))
     Pack_Energy           = np.zeros((n_A, n_S, n_P,n_sims)) 
-    Energy_Pack_Mass      = np.zeros((n_A, n_S, n_P,n_sims))
+    Pack_Mass             = np.zeros((n_A, n_S, n_P,n_sims))
     Power_Conversion_Mass = np.zeros((n_A, n_S, n_P,n_sims))
     System_Voltage        = np.zeros((n_A, n_S, n_P,n_sims))
     System_Power          = np.zeros((n_A, n_S, n_P,n_sims))
@@ -40,10 +37,7 @@ def main():
                 eta_em              = np.random.normal(loc=0.95, scale=0.05, size= n_sims) 
                 eta_p               = np.random.normal(loc=0.95, scale=0.05, size= n_sims) 
                 LD                  = np.random.normal(loc = L_D_aircraft[ac], scale = 1, size= n_sims) 
-                M_struct            = Structural_Weight[ac]
-                M_pass              = Passenger_Weight[ac]
-                M_crew              = Crew_Weight[ac]
-                M_payload           = Payload_Weight[ac]  
+                M_acmd                = M_aircraft_minus_drivetrain[ac] 
                 eta_propulsion      = np.random.normal(loc=0.86, scale=0.02, size= n_sims) 
                 
                 # ------------------- Energy Storage -------------------    
@@ -53,7 +47,7 @@ def main():
                 C_rate_max          = 6
                 E_cell              = np.random.normal(loc=3500, scale=100, size= n_sims)  # specific energy of battery cell
                 Q_cell              = np.random.normal(loc=20, scale=1, size= n_sims) 
-                V_cell              = np.random.normal(loc=4.2,scape=1, size= n_sims)      # voltage of battery cell 
+                V_cell              = np.random.normal(loc=4.2,scale=1, size= n_sims)      # voltage of battery cell 
                 alpha               = np.random.normal(loc=1.42, scale=0.05, size= n_sims) # BMS packaging factor 
                 eta_battery         = np.random.normal(loc=0.9, scale=0.02, size= n_sims)  
             
@@ -86,39 +80,73 @@ def main():
                 D                   = np.random.normal(loc=2000, scale=100, size= n_sims) 
             
                 R,E,M_e, M_p , M_c, V_p,P = compute_performance(n_p, n_s, M_cell, E_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
-                        P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-                        L, rho_cond, rho_insul, eta_em, eta_p, LD, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D , Q_cell, V_cell,C_rate_max)            
+                                                                P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
+                                                                L, rho_cond, rho_insul, eta_em, eta_p, LD, M_acmd, theta_a, I, T_4, D,Q_cell, V_cell,C_rate_max)            
                  
                 Range[ac, n_s_i, n_p_i]                  = R
                 Pack_Energy[ac, n_s_i, n_p_i]            = E
-                Energy_Pack_Mass[ac, n_s_i, n_p_i]       =  M_e
+                Pack_Mass[ac, n_s_i, n_p_i]       =  M_e
                 Power_Conversion_Mass[ac, n_s_i, n_p_i]  =  M_p
                 System_Voltage[ac, n_s_i, n_p_i]         =  V_p
                 System_Power[ac, n_s_i, n_p_i]           =  P
         
-    plot_results(Range, Aircraft_Weight,  Pack_Energy,Energy_Pack_Mass, Power_Conversion_Mass, System_Voltage,System_Power, Max_Power_Required)
+    plot_results(cells_in_series, cells_in_parallel, Range, Aircraft_Weight,  Pack_Energy,Pack_Mass, Power_Conversion_Mass, System_Voltage,System_Power, Max_Power_Required)
     
     return         
         
-def plot_results(Range, Aircraft_Weight,  Pack_Energy,Energy_Pack_Mass, Power_Conversion_Mass, System_Voltage,System_Power, Max_Power_Required):
+def plot_results(cells_in_series, cells_in_parallel, Range, Aircraft_Weight,  Pack_Energy , Pack_Mass, Power_Conversion_Mass, System_Voltage,System_Power, Max_Power_Required):
     
-    fig    = plt.figure() 
-    axis_1 = fig.add_subplot()
-    axis_2 = fig.add_subplot()
-    axis_3 = fig.add_subplot()
-    axis_2 = fig.add_subplot()
-       
-      
-      
-      
-    plt.legend() 
+    x, y =  np.meshgrid(cells_in_parallel, cells_in_series) 
+    for i in  range(3): 
+        fig    = plt.figure()
+        fig.set_size_inches(12,7)
+        axis_1 = fig.add_subplot(2,3,1)
+        axis_2 = fig.add_subplot(2,3,2)
+        axis_3 = fig.add_subplot(2,3,3)
+        axis_4 = fig.add_subplot(2,3,4)
+        axis_5 = fig.add_subplot(2,3,5) 
+
+        a1 = axis_1.contourf(x, y , Range[i, :, :, 0]/1000)
+        axis_1.set_title('Range [km]')   
+        axis_1.set_xlabel('Cells in Parallel')
+        axis_1.set_ylabel('Cells in Series') 
+        fig.colorbar(a1,ax=axis_1,orientation='vertical')
+         
+        a2 = axis_2.contourf(x, y , Pack_Energy[i, :, :, 0]) 
+        axis_2.set_title('Energy Storage Mass [kg]')        
+        axis_2.set_xlabel('Cells in Parallel')
+        axis_2.set_ylabel('Cells in Series') 
+        fig.colorbar(a2,ax=axis_2,orientation='vertical') 
+
+        a3 = axis_3.contourf(x, y , Power_Conversion_Mass[i, :, :, 0])
+        axis_3.set_title('Energy Conversion Mass [kg]')        
+        axis_3.set_xlabel('Cells in Parallel')
+        axis_3.set_ylabel('Cells in Series') 
+        fig.colorbar(a3,ax=axis_3,orientation='vertical')
+        
+
+        a4 = axis_4.contourf(x, y , System_Voltage[i, :, :, 0]/1000) 
+        axis_4.set_title('System Voltage [kV]')        
+        axis_4.set_xlabel('Cells in Parallel')
+        axis_4.set_ylabel('Cells in Series') 
+        fig.colorbar(a4,ax=axis_4,orientation='vertical')
+         
+
+        a5 = axis_5.contourf(x, y , System_Power[i, :, :, 0]/1000000) 
+        axis_5.set_title('System Power [MW]')         
+        axis_5.set_xlabel('Cells in Parallel')
+        axis_5.set_ylabel('Cells in Series') 
+        fig.colorbar(a5,ax=axis_5,orientation='vertical')
+        
+        fig.tight_layout()
+         
     plt.legend()
     plt.show()    
     return 
     
 def compute_performance(n_p, n_s, M_cell, E_cell, alpha, P_motor, T_torque_density, omega, Pd_motor_cooling, eta_motor, 
          P_inverter, Pd_inverter, eta_inverter, eta_propulsion, eta_battery, P_aircraft, Pd_inverter_cooling, V, E0, r_cond, rho, rho_theta_insul, 
-         L, rho_cond, rho_insul, eta_em, eta_p, LD, M_struct, M_pass, M_crew, M_payload, theta_a, I, T_4, D, g,Q_cell, V_cell,C_rate_max):
+         L, rho_cond, rho_insul, eta_em, eta_p, LD, M_acmd, theta_a, I, T_4, D,Q_cell, V_cell,C_rate_max):
 
     # SECTION I: Electrochemical Energy Storage Systems (Batteries)
     M_energy_storage, E_pack, M_BMS =  energy_storage(n_p, n_s, M_cell, E_cell, alpha)
@@ -136,10 +164,10 @@ def compute_performance(n_p, n_s, M_cell, E_cell, alpha, P_motor, T_torque_densi
     M_drivetrain = M_energy_storage + M_electric_power_conversion + M_cable # Equation (25)
 
     # Equation (24): Total Aircraft Mass (M_0) including masses of structure, passengers, crew, payload, and drivetrain
-    M_0 = M_struct + M_pass + M_crew + M_payload + M_drivetrain # Equation (24)
+    M_0 = M_acmd + M_drivetrain # Equation (24)
 
     # Equation (23): Aircraft Range Equation
-    Range =  aircraft_flight_range(E_pack,L, eta_em, eta_p, D,  M_0)
+    Range =  aircraft_flight_range(E_pack,LD, eta_em, eta_p,  M_0)
     
     # Equation (27a): Total Battery Pack Charge
     Q_pack = n_p * Q_cell  # Equation (27a)
@@ -220,11 +248,11 @@ def power_conversion(P_motor, T_torque_density, omega, Pd_motor_cooling, eta_mot
 
     return M_electric_power_conversion
 
-def aircraft_flight_range(E_pack,L, eta_em, eta_p, D, M_0):
+def aircraft_flight_range(E_pack,LD, eta_em, eta_p, M_0):
     g =  9.18
     Wh_per_kg_to_J         = 3600.0 
     E_pack_J               = E_pack *Wh_per_kg_to_J    
-    R = eta_em * eta_p * (L/D) * E_pack_J / (g * M_0)  # Equation (23)
+    R = eta_em * eta_p * (LD) * E_pack_J / (g * M_0)  # Equation (23)
     return R 
 
 if __name__ == '__main__':
