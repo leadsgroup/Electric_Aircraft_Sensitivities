@@ -53,7 +53,7 @@ def main():
             
                 # ---------------------Power Conversion --------------    
                 P_motor             = np.random.normal(loc=Max_Power_Required[ac], scale=100, size= n_sims)  # should this be P_aircraft? 
-                T_torque_density    = np.random.normal(loc=1.5, scale=0.05, size= n_sims) 
+                T_torque_density    = np.random.normal(loc=1.5, scale=0.05, size= n_sims) # This is a test
                 omega               = np.random.normal(loc=2500, scale=200, size= n_sims) 
                 Pd_motor_cooling    = np.random.normal(loc=50, scale=5, size= n_sims) 
                 eta_motor           = np.random.normal(loc=0.98, scale=0.02, size= n_sims) 
