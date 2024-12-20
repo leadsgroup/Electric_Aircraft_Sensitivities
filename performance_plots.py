@@ -42,9 +42,9 @@ def main():
                 
                 # ------------------- Energy Storage -------------------    
                 n_p                 = cells_in_parallel[n_p_i]  # number of cells in parallel 
-                n_s                 = cells_in_series[n_s_i]  # number of cells in series 
+                n_s                 = cells_in_series[n_s_i]  # number of cells in series (going to 10 kilovolts helps to reduce the mass of the cable)
                 M_cell              = 0.048 # unit mass of cell
-                C_rate_max          = 6
+                C_rate_max          = 6 # Make this a range instead of one fixed value (C-rate (dictates number of cells in parallel vs Energy (dictakes of the number of cells in series ))
                 E_cell              = np.random.normal(loc=3500, scale=100, size= n_sims)  # specific energy of battery cell
                 Q_cell              = np.random.normal(loc=20, scale=1, size= n_sims) 
                 V_cell              = np.random.normal(loc=4.2,scale=1, size= n_sims)      # voltage of battery cell 
@@ -55,7 +55,7 @@ def main():
                 P_motor             = np.random.normal(loc=Max_Power_Required[ac], scale=100, size= n_sims)  # should this be P_aircraft? 
                 T_torque_density    = np.random.normal(loc=1.5, scale=0.05, size= n_sims) # T_torque_density at 2500 rpm can be higher than
  		                    # 1.5 Nm/kg for high current/low rpm designs.
-                omega               = np.random.normal(loc=2500, scale=200, size= n_sims) 
+                omega               = np.random.normal(loc=5000, scale=2000, size= n_sims) # between 2500 for propellers, 5000 for turbofan 
                 Pd_motor_cooling    = np.random.normal(loc=50, scale=5, size= n_sims) 
                 eta_motor           = np.random.normal(loc=0.98, scale=0.02, size= n_sims) 
                 
@@ -65,6 +65,7 @@ def main():
                 Pd_inverter         = np.random.normal(loc=50, scale=5, size= n_sims) 
                 eta_inverter        = np.random.normal(loc=0.9, scale=0.02, size= n_sims)  
                 Pd_inverter_cooling = np.random.normal(loc=50, scale=5, size= n_sims) 
+
                 # ------------------------ Cables ----------------------------    
                 theta_a             = np.random.normal(loc=253, scale=20, size= n_sims)   # in Kelvin
                 I                   = 1 # NEED UPDATING 
