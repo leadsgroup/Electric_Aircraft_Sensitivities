@@ -53,7 +53,8 @@ def main():
             
                 # ---------------------Power Conversion --------------    
                 P_motor             = np.random.normal(loc=Max_Power_Required[ac], scale=100, size= n_sims)  # should this be P_aircraft? 
-                T_torque_density    = np.random.normal(loc=1.5, scale=0.05, size= n_sims) 
+                T_torque_density    = np.random.normal(loc=1.5, scale=0.05, size= n_sims) # T_torque_density at 2500 rpm can be higher than
+ 		                    # 1.5 Nm/kg for high current/low rpm designs.
                 omega               = np.random.normal(loc=5000, scale=2000, size= n_sims) # between 2500 for propellers, 5000 for turbofan 
                 Pd_motor_cooling    = np.random.normal(loc=50, scale=5, size= n_sims) 
                 eta_motor           = np.random.normal(loc=0.98, scale=0.02, size= n_sims) 
@@ -64,15 +65,7 @@ def main():
                 Pd_inverter         = np.random.normal(loc=50, scale=5, size= n_sims) 
                 eta_inverter        = np.random.normal(loc=0.9, scale=0.02, size= n_sims)  
                 Pd_inverter_cooling = np.random.normal(loc=50, scale=5, size= n_sims) 
-                V                   = 1 # NEED UPDATING 
-                E0                  = 2.51e3 
-                r_cond              = np.random.normal(loc=10, scale=0.1) 
-                rho                 = 1 # NEED UPDATING 
-                rho_theta_insul     = 1 # NEED UPDATING 
-                L                   = 1 # NEED UPDATING (Can be a function of current,voltage, motors etc)
-                rho_cond            = 1 # NEED UPDATING 
-                rho_insul           = 1 # NEED UPDATING 
-                    
+
                 # ------------------------ Cables ----------------------------    
                 theta_a             = np.random.normal(loc=253, scale=20, size= n_sims)   # in Kelvin
                 I                   = 1 # NEED UPDATING 
